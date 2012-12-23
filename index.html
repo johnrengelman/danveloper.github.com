@@ -8,6 +8,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
+    <link rel="shortcut icon" href="assets/img/danveloper-space.png">
+
     <link href="assets/css/font-awesome.css" rel="stylesheet">
     <link href="assets/css/bootstrap.css" rel="stylesheet">
     <link href="assets/css/blog.css" rel="stylesheet">
@@ -158,7 +160,7 @@
 	<div class="span12">
 	  <h4>Differentiation</h4>
 	  <p>
-	    It is important to take the time to note and outline the very compelling and important differences between <i>rules</i> and <i>validation</i>. The scope of this post focuses on how to impose your application's domain-specific rules to an application, a process that is entirely different from validation, which is something that should happen at the service or other data access layer of your application. It may be that business logic applies to one property of your model given the value of another property in the same instance. It is appealing, and even in some cases promoted, to employ a pattern that determines at save-time if a user action can proceed based on whether or not your save operation passes validation. This pattern of determining application workflow should be reserved only for the most necessary of circumstances. Your validation should focus on the relevency and cleanliness of the data that you are about to store in your database, while your rules engine should be the used to impose those business rules against your model object prior to it getting to the database save point. Keeping your business logic isolated to your <span class="highlight">application</span> layer means that you will always know where your domain-specific logic resides, while your validation logic should ensure that the proper data types and references are in place prior to the entity being persisted.
+	    It is important to take the time to note and outline the very compelling and important differences between <i>rules</i> and <i>validation</i>. The scope of this post focuses on how to impose your application's domain-specific rules to an application, a process that is entirely different from validation, which is something that should happen at the service or other data access layer of your application. It may be that business logic applies to one property of your model given the value of another property in the same instance. It is appealing, and even in some cases promoted, to employ a pattern that determines at save-time if a user action can proceed based on whether or not your save operation passes validation. This pattern of determining application workflow should be reserved only for the most necessary of circumstances. Your validation should focus on the relevency and cleanliness of the data that you are about to store in your database, while your rules engine should be used to impose those business rules against your model object prior to it getting to the database save point. Keeping your business logic isolated to your <span class="highlight">application</span> layer means that you will always know where your domain-specific logic resides, while your validation logic should ensure that the proper data types and references are in place prior to the entity being persisted.
 	  </p>
 	</div>
       </div>
@@ -167,7 +169,7 @@
 	<div class="span12">
 	  <h4>Conclusion</h4>
 	  <p>
-	    This post demonstrated how to develop an architecturally and structurally sound manner of implementing a flexible and maintainable rules engine in your application. The manner that I use to demonstrate this focuses on strict architecture paradigms and flexible, maintainable design patterns. Building on these examples will help your application lend itself to future maintainability and expansion, while following an organic and logic structural pattern. I hope that you found this post useful.
+	    This post demonstrated how to develop an architecturally and structurally sound manner of implementing a flexible and maintainable rules engine in your application. The manner that I use to demonstrate this focuses on strict architecture paradigms and flexible, maintainable design patterns. Building on these examples will help your application lend itself to future maintainability and expansion, while following an organic and logical structural pattern. I hope that you found this post useful.
 	  </p>
 	</div>
       </div>
