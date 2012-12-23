@@ -1,0 +1,88 @@
+      .social {
+	display: inline-block;
+	width: 50px;
+      }
+      .highlight {
+	background: #ccc;
+	font-family: 'Courier';
+	font-size: 12px;
+	padding: 2px 4px 2px 4px;
+	font-weight: bold;
+      }
+      [class^="icon-"], [class*=" icon-"] {
+	background-image: none !important;
+      }
+      .footer [class^="icon-"], [class*=" icon-"] {
+	line-height: 20px;
+      }
+      html {
+	background: url(../img/wild_oliva.png);
+      }
+
+      body {
+        padding-top: 20px;
+        padding-bottom: 40px;
+	background: transparent;
+	font-size: 12px;
+      }
+      p {
+	line-height: 25px;
+      }
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 700px;
+	background-color: #fff;
+	padding: 50px;
+	box-shadow: 1px 1px 42px 5px #000;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+      .jumbotron {
+        margin: 60px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 40px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+      .lead {
+	margin-bottom: 20px;
+	font-size: 18px;
+	font-weight: 200;
+	line-height: 30px;
+	margin: 0px auto;
+	color: #999;
+      }
+      .byline {
+	font-size: 14px;
+	color: #c8c8c8;
+      }
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+     .dan-brand {
+	background-image: url(../img/danveloper-space.png);
+	background-size: 35px;
+	background-repeat: no-repeat;
+	padding-left: 40px; 
+	line-height: 35px;
+     }
+     .marketing.body {
+	margin: 0px;
+     }
+     .nav-pills > .active > a, .nav-pills > .active {
+	background-color: #A29D3B;
+	border-radius: 5px;
+     }
+     .nav-pills > .active > a, .nav-pills > .active > a:hover {
+	background-color: #A29D3B;
+	border-radius: 5px;
+     }

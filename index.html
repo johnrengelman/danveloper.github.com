@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Rules Engine &middot; danveloper's blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="assets/css/font-awesome.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/blog.css" rel="stylesheet">
+    <link href="assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="assets/ico/favicon.png">
+  </head>
+
+  <body>
+
+    <div class="container-narrow">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a href="http://danveloper.com"><i class="icon-home"></i> Home</a></li>
+          <li><a href="http://twitter.com/danveloper"><i class="icon-twitter"></i> Twitter</a></li>
+          <li><a href="mailto:daniel.p.woods@gmail.com"><i class="icon-envelope"></i> Email</a></li>
+        </ul>
+        <h3 class="muted dan-brand">
+		danveloper's blog.
+	</h3>
+      </div>
+
+      <hr>
+
+      <div class="jumbotron">
+        <h1>Developing a Rules Engine in Groovy</h1>
+        <p class="lead">
+	  The architecture and structure of a versatile and dynamic rules engine pattern in Groovy.
+	  <br/>
+	  <span class="byline">By Dan Woods</span>
+	</p>
+      </div>
+
+      <hr>
+
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>Introduction</h4>
+	  <p>
+	    One of the biggest problems that we face in application development is how to structurally compose our application's code in a manner that will lend itself to modularity and maintainability. This issue becomes compounded when your application must maintain evolving business and application logic. How and where to put that domain-specific code can become a painpoint for developers of every skill level. This post will demonstrate how to develop a flexible rules engine pattern that will equip application and business logic with the same modular maintainability as the rest of your application.
+	  </p>
+	</div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>Approach</h4>
+	  <p>
+	    The basic dillema of domain-specific logic in any application is how to keep it maintainable. Quickly, it will become realized that intertwining the domain-specific logic in the workflow of the application makes for difficult maintainability and, often-times, a duplication of code. Additionally, locating the impact of a specific business function can become an insurmountable task without good modularity of that code. So, the approach for achieving the necessary modularity can be defined as simply as keeping that logic separated from your application's workflow code. The complexity of the approach is developing or employing the right pattern to ensure it's easy to integrate that domain logic in your workflow as necessary. Groovy makes it pretty easy for application developers to design and implement flexible patterns, and for this article I will demonstrate how to leverage Groovy's dynamic nature in developing a good rules engine.
+	  </p>
+	</div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>Scenario</h4>
+	  <p>
+	    The scenario that I will use to demonstrate implementing a modular, flexible rules engine will be an example application that chooses a student's dormatory hall for the coming school year. The university assigns students a dorm hall based on their grade point average range.
+	    <br/>
+	    <dd>
+		<h6>The Rules</h6>
+	    	<ul>
+	    		<li>Students with a GPA of 3.5 or higher will be assigned to the <span class="highlight">Honors</span> dorm hall.</li>
+	    		<li>Students with a GPA greater than 3.0 and up to 3.5 will be assigned to the <span class="highlight">Preferred</span> dorm hall.</li>
+	    		<li>All other students will live in the <span class="highlight">Normal</span> dorm hall.</li>
+	    	</ul>
+	    </dd>
+	  </p>
+	</div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>Composition</h4>
+	  <p>
+	    We will employ the factory pattern to produce a wholly composed instance of our rules engine, with which we can apply the specific rule set. Each rule will be defined in its engine as a <a href="http://groovy.codehaus.org/Closures+-+Formal+Definition">closure</a> and we will use Groovy's elite reflective capabilities to discover and apply the rules at runtime.
+	    <br/>
+	    <p>Our student model entity will look like this for the purposes of this post:</p>
+	    <script src="https://gist.github.com/4362001.js"></script>
+	    <br/>
+	    <p>Our example enrollment rules engine will look like this:</p>
+	    <script src="https://gist.github.com/4361997.js"></script>
+	  </p>
+	</div>
+       </div>
+       <hr>
+       <div class="row-fluid marketing body">
+	  <div class="span12">
+	    <h4>Rules Engine Support</h4>
+	    <p>
+	      The rules from our rules engine will be employed when we call the <span class="highlight">apply()</span> method. This method will use reflection on an instance of the rules engine to discover the defined rules in the engine. We will use a convention over configuration approach to make the rule sets discoverable. Each rule will be defined on the engine as a closure and its field name will end with "Rule". For example, we have defined the <span class="highlight">dormHallRule</span> on the rules engine. This will be discovered by the support class that each rules engine will need to extend. When <span class="highlight">apply()</span> is called, an instance of the model entity will be supplied to the rule for consideration.
+	      <br/>
+	      <p>The support class will look like this:</p>
+	      <script src="https://gist.github.com/4362029.js"></script>
+	    </p>
+	  </div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>The Factory</h4>
+	  <p>
+	    Since there is some setup work that is needed to get the rules engine in a state where it is ready to be used, we will use a factory to setup each of our rules engine. Once it's setup, we will call the <span class="highlight">getObject()</span> method on the factory, with an instance of our model entity in order to get back a wholly constructed rules engine. This will allow our factory instance to be reusable for a given rule set against many different entity instances. This will save us setup time every time that we apply the rules, and means that we can set the extent of our rules engines up at applicable startup and have them in a ready-to-use state when we get our model entities are ready to have rules applied.
+	  </p>
+	  <p>The rules engine factory looks like this:</p>
+	  <script src="https://gist.github.com/4362087.js"></script>
+	  <br/>
+	  <p>
+	   Each rules engine will have to implement a marker interface that the factory will use to assist with typing and to validate that the given class is meant to be used as a rules engine:
+	  </p>
+	  <script src="https://gist.github.com/4362093.js"></script>
+	</div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>Structure</h4>
+	  <p>
+	    The structure of the application rules and the placement of the engines is of paramount importance to the maintainbility of the domain logic. It is important when building your application to plan in advance to have different levels of exposure to different parts of the code. This is the concept of modularity when you're building constructing your application, and modern day build systems make it easy to create a modular application. For the purposes of this posts' example application, there will be a minimum of three modules: <span class="highlight">model</span>, <span class="highlight">services</span>, and <span class="highlight">application</span>. The <span class="highlight">model</span> layer will represent the data model and is where our application's entity classes will be; the <span class="highlight">services</span> module will serve as our data access layer; and our <span class="highlight">application</span> layer will house the classes that represent our application rules engines and the classes that directly interface with those rules engines. A perfect example of expressing the application layer is by demonstrating the processor that will be used to impose the enrollment rules against the student model entity.
+	  </p>
+	  <p>The EnrollmentProcessor looks like this:</p>
+	  <script src="https://gist.github.com/4362186.js"></script>
+	</div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>Tying it all together</h4>
+	  <p>
+	    So I've given you the structure and the classes that you'll need to be well on your way to implementing a modular, maintainable, and flexible rules engine pattern within your application. So now, a full blown example that ties all of the pieces together:
+	  </p>
+	  <script src="https://gist.github.com/4362217.js"></script>
+	</div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>Differentiation</h4>
+	  <p>
+	    It is important to take the time to note and outline the very compelling and important differences between <i>rules</i> and <i>validation</i>. The scope of this post focuses on how to impose your application's domain-specific rules to an application, a process that is entirely different from validation, which is something that should happen at the service or other data access layer of your application. It may be that business logic applies to one property of your model given the value of another property in the same instance. It is appealing, and even in some cases promoted, to employ a pattern that determines at save-time if a user action can proceed based on whether or not your save operation passes validation. This pattern of determining application workflow should be reserved only for the most necessary of circumstances. Your validation should focus on the relevency and cleanliness of the data that you are about to store in your database, while your rules engine should be the used to impose those business rules against your model object prior to it getting to the database save point. Keeping your business logic isolated to your <span class="highlight">application</span> layer means that you will always know where your domain-specific logic resides, while your validation logic should ensure that the proper data types and references are in place prior to the entity being persisted.
+	  </p>
+	</div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing body">
+	<div class="span12">
+	  <h4>Conclusion</h4>
+	  <p>
+	    This post demonstrated how to develop an architecturally and structurally sound manner of implementing a flexible and maintainable rules engine in your application. The manner that I use to demonstrate this focuses on strict architecture paradigms and flexible, maintainable design patterns. Building on these examples will help your application lend itself to future maintainability and expansion, while following an organic and logic structural pattern. I hope that you found this post useful.
+	  </p>
+	</div>
+      </div>
+      <hr>
+      <div class="row-fluid marketing footer">
+        <div class="span6">
+          <h4><a href="http://twitter.com/danveloper"><span class="social"><i class="icon-twitter"></i></span>@danveloper</a></h4>
+	  <hr>
+	  <h4><a href="http://github.com/danveloper"><span class="social"><i class="icon-github"></i></span>danveloper at github</a></h4>
+	  <hr>
+          <h4><a href="http://facebook.com/danveloper"><span class="social"><i class="icon-facebook"></i></span>Daniel Woods on facebook</a></h4>
+	  <hr>
+          <h4><a href="http://www.linkedin.com/in/danveloper"><span class="social"><i class="icon-linkedin"></i></span>Dan Woods on LinkedIn</a></h4>
+	  <hr>
+	  <h4><a href="mailto:daniel.p.woods@gmail.com"><span class="social"><i class="icon-envelope"></i></span>me at gmail</a></h4>
+        </div>
+
+        <div class="span6">
+          <h4>Web Developer.</h4>
+          <p>I develop the web.</p>
+
+          <h4>Architect.</h4>
+          <p>I have a passion for good software design.</p>
+
+          <h4>Problem Solver.</h4>
+          <p>I solve problems with software.</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="footer">
+        <p class="pull-left">&copy; Dan Woods 2012.</p>
+	<p class="pull-right">But, it's free for you to use in any way you see fit.</p>
+	<div style="clear:both"></div>
+      </div>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+
+  </body>
+</html>
