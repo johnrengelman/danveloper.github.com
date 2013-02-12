@@ -86,3 +86,9 @@
 	background-color: #A29D3B;
 	border-radius: 5px;
      }
+	.gist table.lines {
+		width: 100% !important;
+	}
+	.line-pre {
+		font-size: 10px !important;
+	}
