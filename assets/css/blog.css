@@ -92,3 +92,22 @@
 	.line-pre {
 		font-size: 10px !important;
 	}
+	.caption {
+		text-align: center;
+		font-style: italic;
+		color: #ccc;
+	}
+	.git-clone {
+		font-family: 'Courier';
+		font-size: 11px;
+		background-color: #e1e1e1;
+		color: rgb(0, 0, 0);
+		padding: 10px;
+	}
+	.code {
+		padding: 2px;
+		font-family: 'Courier';
+		font-size: 11px;
+		background-color: #e1e1e1;
+		color: #000;
+	}
