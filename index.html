@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Real Time Logging &middot; danveloper's blog</title>
+    <title>Coping &middot; danveloper's blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -23,7 +22,30 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
       <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
                     <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
-                                   <link rel="shortcut icon" href="assets/img/danveloper-space.png">
+                                   <link rel="shortcut icon" href="assets/ico/favicon.png">
+
+	<style>
+div.marketing p { padding: 10px 0px 10px 0px; font-family: 'Courier New'; font-size: 13px;}
+	</style>
+<script>
+// Check if a new cache is available on page load.
+window.addEventListener('load', function(e) {
+
+  window.applicationCache.addEventListener('updateready', function(e) {
+    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+      // Browser downloaded a new app cache.
+      // Swap it in and reload the page to get the new hotness.
+      window.applicationCache.swapCache();
+      if (confirm('A new version of this site is available. Load it?')) {
+        window.location.reload();
+      }
+    } else {
+      // Manifest didn't changed. Nothing new to server.
+    }
+  }, false);
+
+}, false);
+</script>
   </head>
 
   <body>
@@ -44,232 +66,62 @@
       <hr>
 
       <div class="jumbotron">
-        <h1>Real Time Logging</h1>
+        <h1>Coping</h1>
         <p class="lead">
-	    a grails-based, real time log streaming web application, built using modern technology and love.
-	  <br/>
-	  <span class="byline">By Dan Woods</span>
-	  <br/><br/>
-	  <span class="git-clone">git clone git://github.com/danveloper/real-time-logging.git</span>
-	</p>
-      </div>
-
-      <hr>
-		<div class="row-fluid marketing body">
-		<div class="span12">
-		<h4>Screenshots</h4>
-		<a href="assets/img/real-time-logging/real-time-logging-error-messages.png" target="_img"><img src="assets/img/real-time-logging/real-time-logging-error-messages.png"></a>
-		<div class="caption">New Logging Windows Show When Applications Subscribe</div>
-		<br/>
-		<a href="assets/img/real-time-logging/real-time-logging-multiple-streams-different-levels.png" target="_img"><img src="assets/img/real-time-logging/real-time-logging-multiple-streams-different-levels.png"></a>
-		<div class="caption">Different Logging Streams, Displaying Different Logging Levels</caption>
-		<br/><br/>
-		<a href="assets/img/real-time-logging/real-time-logging-showing-many-streams.png" target="_img"><img src="assets/img/real-time-logging/real-time-logging-showing-many-streams.png"></a>
-		<div class="caption">A Whole Lot Of Applications Logging</div>
-		</div>
-		</div>
-		</div>
-	  
-	  <hr>
-
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>Introduction</h4>
-	  <p>
-A little while ago I heard about a project that wired up real time logging using comet or something similar, maybe long-polling ajax and updated a contained view. From an operations standpoint, rapid access to streaming logs like that is the pen-ultimate insight. Most will spawn hundreds of terminals, ssh'ing furiously between boxes, tailing logs in tiled view on one screen, fullscreen on another, cascaded on another. If you do this every day, you've undoubtedly learned the zen of having that insight, but have also probably learned the amount of headaches that go along with this approach. I've always wanted to have a consolidated view of streaming logs from my apps, and even though there's a lot of ways to do this, there's nothing that's truly "awesome" at doing it... In fact, I'd go as far to say that most of them really suck. To that end, I set off to write my own -- something awesome, designed for modern users, that leverages the extent of what we can do with technology, instead of limiting to the lowest common denominator.
-<br/><br/>
-In as concise a manner as possible, I'm intent to have this post serve as a technical write-up on how I leveraged a modern technology stack to be able to monitor my Java/Log4j application logs in real time. I have a tendency to get carried away when I'm talking about really awesome stuff, so I'll do my best to focus on the how-to without sacrificing technical detail. If I missed something, get in touch with me on twitter: <a href="http://twitter.com/danveloper" target="_blank">@danveloper</a>.
-	  </p>
-	</div>
-      </div>
-<hr>
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>Orientation</h4>
-	  <p>
-Allow me to orient you on what I'm hoping to accomplish. When an application in my domain writes a log message, I want that message sent to my logging server and delivered at the same time to everybody who is viewing the real-time logging web page. Since this is the future, I expect that there won't be a delay in getting the message to everybody at the same time. In other words, all clients should receive log messages at the same time (so no polling).
-	  </p>
-	</div>
-      </div>
-<hr>
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>Tech Stack</h4>
-	  <p>
-I built the server application and tech stack using a reactive, message-driven programming paradigm. Every operation that happens &mdash; from the logging event to the client's DOM being updated &mdash; is initiated by a log message being delivered to the server. There's no polling that happens, which also means that everything happens in real-time. Let me talk about the frameworks and technologies that I used to get there:
-<ul>
-
- <li><b>Grails</b> - The server is built on Grails, which gives us Spring right out the box, and we will use that to make this all possible.</li>
- <li><b>ActiveMQ</b> - An ActiveMQ JMS server is embedded in the Grails application, allowing client applications to send their logging messages to the server as a JMS message.</li>
- <li><b>Spring Integration</b> - Spring Integration is used to bridge the receipt of the JMS message to a service class that decorates the message and ultimately uses Atmosphere to broadcast it to the web page.</li>
- <li><b>Atmosphere</b> - Atmosphere is used to publish updates to clients via Websockets, and there was already a grails plugin made to do this, so it was an easy choice.</li>
- <li><b>Jetty</b> - Websocket support is a must and Tomcat sucks at them, so I went with Jetty.</li>
- <li><b>Log4j</b> - Log4j is what everything already uses for logging and has a JMS appender out of the box, so it was an easy choice. The JMS appender was extended for the purposes of this application -- more on that next.</li>
-
-</ul>
-
-(... Not necessarily in that order.)
-	  </p>
-	</div>
-      </div>
-<hr>
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>Enhancing Log4j's JMS Appender</h4>
-	  <p>
-I should probably start at the lowest level here -- how we're going to get the message from the client application to the logging server. To do this, we need to enhance Log4j's out-of-the-box JMS appender. We'll be enriching the headers of the JMS message that would normally be delivered to include meta-data that will allow us to categorize the application (and define it as a unique logging instance). Essentially, we'll be adding properties that will uniquely define the message: the application's name, the hostname of the server the message came from, and the ip address they came from. I figured this provided a pretty solid composite key to uniquely differentiate the source of log messages. To accomplish this, we'll be overriding Log4j's <span class="code">JMSAppender#append</span> method.
-<br/>
-<script src="https://gist.github.com/danveloper/5208508.js"></script>
-<br/>
-Once the JMS appender is enhanced, we need to configure Log4j to use it. We'll need to change some properties from the <a href="http://activemq.apache.org/how-do-i-use-log4j-jms-appender-with-activemq.html" target="_blank">default implementation</a> - to tell the appender what our application name is:
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5208518.js"></script>
-<br/>
-This configuration will write log messages via both stdout and our enhanced JMS appender. The enriched headers will tell the server what channel the log file is to written to for our clients. That way we'll be able to watch many log files in a single page view. #awesome
-<br/><br/>
-The code for this is inside the <a href="https://github.com/danveloper/real-time-logging/tree/master/enhanced-log4j-jms-appender" target="_blank">enhanced-log4j-jms-appender directory</a> of the project. If you follow the simple path, from that directory you can run <span class="code">./gradlew install</span> and it will install the artifact to your local maven repository. From there, you can resolve the artifact in your client applications (the applications for which you would like to see the logs) with:
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5208527.js"></script>
-	  </p>
-	</div>
-      </div>
-<hr>
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>Embedding the ActiveMQ Server</h4>
-	  <p>
-Probably one of the most important things that I was trying to accomplish was making this project entirely self-contained. To that end, I decided to embed an ActiveMQ JMS server inside the Grails application, so that logging applications could log directly to my application's instance. Of course, there's no reason why you couldn't point to a centralized JMS server. On a side note, having an embedded JMS server inside a Grails application turns out to be a really cool thing, and the flexibility of Spring Integration with AMQ channels means that you can make some really cool message-driven stuff based off of this.
-<br/><br/>
-To start with, define the dependencies in <span class="code">BuildConfig.groovy</span>:
-<br/>
-<script src="https://gist.github.com/danveloper/5208543.js"></script>
-<br/>
-Now we can use the AMQ Spring context-integration to integrate AMQ seamlessly into our Grails app. To do this, add the following to <span class="code">resources.groovy</span>:
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5208548.js"></script>
-<br/>
-Now you have AMQ fully integrated in the Spring context. When the Grails app starts up, it will also stand-up a JMS server on port <span class="code">61616</span>. We've also created a bean called <span class="code">logMessageDestination</span> that will serve as the destination object for messages sent to <span class="code">log.*</span> topics on the JMS server.
-	  </p>
-	</div>
-       </div>
-       <hr>
-       <div class="row-fluid marketing body">
-	  <div class="span12">
-	    <h4>Becoming Message Driven</h4>
-	    <p>
-An important part of the goal of the project is to show the log message in a web view as soon as the logging event occurs. If we handle retrieving/processing log messages by polling the queue, there's a chance that the people who are waiting to see the log messages will not get them as soon as possible, so this isn't a good thing. To solve this, what we want to do is kick off a sequence of events that will ultimately broadcast the message simultaneously to everybody who's waiting to see it. To do this we can leverage the strength of Spring Integration to build a message-driven workflow.
-<br/><br/>
-Begin by defining the Spring Integration dependencies in <span class="code">BuildConfig.groovy</span>:
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5208555.js"></script>
-<br/>
-Now we need to extend our Spring context to tell it to do stuff when a message is received on the ActiveMQ JMS channel. To do this, we'll use the Spring Integration 'jms' namespace to configure a jms channel adapter that will internally transfer the message from the JMS channel to an internal channel that we'll also define in the configuration.
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5208564.js"></script>
-<br/>
-We've done a few things here, including registering the <span class="code"><a href="https://github.com/danveloper/real-time-logging/blob/master/log-server/src/groovy/com/danveloper/realtimelogging/server/services/LoggingServiceActivator.groovy" target="_blank">LoggingServiceActivator</a></span> class in the Spring context as a bean named <span class="code">logServiceActivator</span>. From there, we're also defining a Spring Integration channel named <span class="code">logChannel</span>, and attaching a chain to that channel so that every message that goes to it will be delegated to the <span class="code">log</span> method of the <span class="code">logServiceActivator</span> instance. (I do operations against channels in chains because it's really easy to add things on to them later without having to think too hard about it.) The final (and most important) thing in this configuration is attaching the <span class="code">logMessageDestination</span> destination to the <span class="code">logChannel</span> Spring Integration channel using Spring Integration's JMS <span class="code"><a href="http://static.springsource.org/spring-integration/archive/1.0.0.RELEASE/reference/html/ch17s02.html" target="_blank">message-driven-channel-adapter</a></span>. Using this configuration, messages that are delivered to the <span class="code">log.*</span> topic will now be delegated to the <span class="code"><a href="https://github.com/danveloper/real-time-logging/blob/master/log-server/src/groovy/com/danveloper/realtimelogging/server/services/LoggingServiceActivator.groovy#L19" target="_blank">log</a></span> method of the <span class="code"><a href="https://github.com/danveloper/real-time-logging/blob/master/log-server/src/groovy/com/danveloper/realtimelogging/server/services/LoggingServiceActivator.groovy" target="_blank">LoggingServiceActivator</a></span> class. Now we can do some really cool stuff...
+	  		<span class="byline">May 31, 2013 &bull; Dan Woods</span>
 		</p>
+      </div>
+
+      <hr>
+
+      <div class="row-fluid marketing body">
+		<div class="span12">
+	  		<p>
+I recently left my nine-to-five after just seven months on the job. 
+	  		</p>
+			<p>
+I took the job in the first place because their recruiting department had done such a stellar job of selling the culture of the company. They touted an organization of open-mindedness and collaboration; they showed off the Google-esque bean bags and the glass-enclosed "war rooms". This place, I had determined, was a place where I could learn a lot and do a lot of cool things. It seemed like mediocrity and closed-mindedness couldn't thrive in this environment -- certainly neither could bad management. But eventually, once the facade was unveiled, I was left with a sad reality, and a choice.
+			</p>
+<p>
+My first two months on the job were spent familiarizing myself with, and improving, a particular application. At the end of the two months I had refactored over 40,000 lines of code to around 10,000 lines of code. We had a successful production release of the refactor and I was thrilled with my work, and the company. The guys that I worked with were great, and everything was living up to expectations. I bragged to my friends and former coworkers about how awesome my job was and how great things were going.
+</p>
+<p>
+Then something weird happened. My boss was demoted and they called in a replacement. Since I didn't have any history with the company, I didn't have any idea what might have been the factors that led up to this point, but I did find it strange. It seemed like he was running a winning team. Our application stack was responsible for bringing in more tens of millions of dollars annually, and had done so under his guidance over the past five years.
+</p>
+<p>
+The new guy was already a manager of another group, and at first he didn't say much. My old boss had been allowed to keep his office and was pretty much doing the same stuff, so I thought that it was just a paperwork thing, even though much ado at meetings was given to the official title changes. After a short period of time, my new boss decreed that he wanted to have weekly one-on-ones with everybody on the team. It was clear that this was his way of "getting to know the team" without having to actually *work* with the team, but I wanted to give him the benefit of the doubt, so I withheld any judgement and I checked my biases at the door.
+</p>
+<p>
+Quickly, the warning signs of bad management started to seep to the surface: red flags, ones for which I had become uniquely attuned, started to pop up. The signs were difficult to ignore, and I knew officially that we were in a bad management scenario when one of the senior developers on the team quit. 
+</p>
+<p>
+I'm no stranger to bad management. At one company, I saw 32 senior level developers leave over a period of a few months because of the company's atrocious management. After the senior guys had all left that company, I stood by and watched as the remaining developers steadily trickled out. For a twenty month stretch of time, at least one developer had left every month because of mismanagement by the "Information Systems Leadership" group. I watched the company completely turn over a programming staff in just twenty-four months. It eventually got to the point where the good managers were also quitting.
+</p>
+<p>
+The folks who had left that job were unconsciously aware of something that you only get with experience from working under bad management. They probably couldn't articulate it even now, but the reality was that those developers knew that once you've worked for bad management, you become more attuned to recognizing it. With this super power, the more experienced guys were able to make haste in their decisions before the consequences of bad management affected them.
+</p>
+<p>
+Too much has been written on the consequences of bad management to an organization -- diminished morale, lower productivity, poor recruiting -- but that's not what I'm talking about. I'm talking about what those 32 senior level developers knew when they nearly-collectively walked out the door. They knew that they had three options: find a new job, get really embittered by the bad management, or learn to cope with the bad managers. Perhaps worse than any organization-wide impact of bad management is the toll that it can take on the individual developer when these decisions are what they're left with.
+</p>
+<p>
+An employee's embitterment with a job ultimately results in them finding a new job, but the more experienced and senior guys would be able to tell you that bitterness isn't worth it. They would tell you to skip that step entirely and just go directly to finding a new job, because their experience has given them the benefit of being able to intuitively recognize when decisions need to be made. They also know that when the options are reduced to finding a new job or learning to cope with the bad management, the latter will only hurt your career. That's a fact that my latest encounter with bad management has allowed me to see with an unparalleled lucidity.
+</p>
+<p>
+The reality, though, is that for some people it makes sense to develop those coping strategies. Not everybody goes to a job to build a career, and not everybody stays in a position because they like the work and love the company. For some people it makes sense for financial or family reasons to learn to deal with a crappy manager instead of trying to find a new job.
+<p>
+The downside to working with those guys is that they have made the decision to divert their focus from developing their craft and career, to developing coping strategies for their managers. Surrounding yourself with these people means that you will be susceptible to their rhythm of mediocrity. Certainly, when their time is split between developing themselves professionally and developing their ability to deal with the people they report to, they can hope to be little more than mediocre. Indeed, the people who survive exoduses of bad management are the ones who are mediocre craftsmen and competent copers.
+<p>
+Over the period of the next few months of working with my newly appointed manager, he had demonstrated all of the signs of bad management that my experience had shown me. Everybody recognizes and articulates them in different ways, so I won't go into what those signs are; what's more important is that you recognize the intuition that only experience can give you, and that you act on it when your spidey senses tingle.
+<p>
+When I recognized that the options were at hand, it was an easy decision for me to make. I was criticized hard by people in the company, by my peers, and my family. They said that I didn't give it enough time and that I wasn't patient enough. But what I knew is that some people will just never get to the point where they have developed that intuition or where they can recognize when it is warning them. It didn't matter though, because I knew that I had made the right choice. It was time to move on.
+<p>
+Ultimately, it will probably never make sense for me to develop coping strategies for a shitty manager. It might just be something about me or my personality, but maximizing my effort toward learning and growing personally, and professionally, is far more appealing to me than spending time and energy trying to learn to deal with some guy who's just bad at his job.
+</p>
+<p style="text-align: center">&bull;</p>
+		</div>
 	  </div>
-      </div>
-      <hr>
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>Making the Message Usable</h4>
-	  <p>
-Now that we have the message going to a service class, we can massage it before broadcasting it to the web page. Before we can do that, though, we need to read the message meta-data off of the headers that were enriched with the <span class="code"><a href="https://github.com/danveloper/real-time-logging/blob/master/enhanced-log4j-jms-appender/src/main/java/com/danveloper/log4j/jms/EnhancedJMSAppender.java" target="_blank">EnhancedJMSAppender</a></span>. Using this data, we can construct a command object that we'll send to another service that will use Atmosphere and Websockets to deliver it to the right channel for the UI to update the web page.
-<br/><br/>
-The <span class="code"><a href="https://github.com/danveloper/real-time-logging/blob/master/log-server/src/groovy/com/danveloper/realtimelogging/server/services/LoggingServiceActivator.groovy" target="_blank">LoggingServiceActivator</a></span> is really simple, and really serves as just a transformer from the message payload structure to a command object type that the <span class="code"><a href="https://github.com/danveloper/real-time-logging/blob/master/log-server/grails-app/services/com/danveloper/realtimelogging/server/services/LoggingService.groovy" target="_blank">LoggingService</a></span> is expecting:
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5208581.js"></script>
-<br/>
-The <span class="code">LogMessageCommand</span> object also decorates the properties of the message with a <span class="code">messageTime</span> property, indicating when the message was received. In my example this property is unused, however it could be used to determine if a logging channel (widget) in the UI is valid anymore (and possibly remove it if not).
-	  </p>
 	</div>
-      </div>
-      <hr>
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>Atmosphere</h4>
-	  <p>
-The <a href="http://grails.org/plugins/atmosphere" target="_blank">Atmosphere plugin for Grails</a> removes a lot of the set-up and makes it really easy to stand-up a Websocket end-point with very little effort. After installing the plugin, I defined the mapping URI in the Grails config file.
-<br/><br/>
-In <span class="code">Config.groovy</span>:
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5208588.js"></script>
-<br/>
-The composed URL from this path will become the endpoint for the user interface's websocket connector. When new logging messages come in, we'll broadcast them through this endpoint and the javascript code will figure out what needs to happen with them.
-<br/><br/>
-With the mapping URI composed, we now have to indicate that we want to use it... The default behavior in the grails-atmosphere-plugin is to map all paths under the <span class="code">'/atmosphere'</span> URI to the Stratosphere servlet, which is the under-the-covers class that Atmosphere uses to communicate through websockets (in our case) back to the user interface. As you can see from the above code snippet, this behavior was just fine for my purposes, but if you have other needs, you can configure this value in <span class="code"><a target="_blank" href="https://github.com/danveloper/real-time-logging/blob/master/log-server/grails-app/conf/AtmosphereConfig.groovy">grails-app/conf/AtmosphereConfig.groovy</a></span>.  You may recall from the above that messages are delegated to the <span class="code">log</span> method on the <span class="code">LoggingService</span>. The below code snippet demonstrates what happens with those messages once they are received. Notice that using the grails-atmosphere-plugin, the <span class="code">broadcaster</span> map is conveniently injected into our service. This map contains the URI to broadcaster relationship, so we can use it to get a handle on the mapping URI's broadcaster and publish messages to the UI.
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5214002.js"></script>
-	  </p>
-	</div>
-      </div>
-      <hr>
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>User Interface</h4>
-	  <p>
-Now that we're receiving, transforming, and transmitting the log messages via Websocket, we need to have the user interface listen for those messages and update the screen accordingly.
-<br/><br/>
-Inside the <span class="code">view/logging/index.gsp</span> file, I put the following:
-<br/><br/>
-<script src="https://gist.github.com/danveloper/5208601.js"></script>
-<br/>
-This instructs Atmosphere to call the <span class="code"><a href="https://github.com/danveloper/real-time-logging/blob/master/log-server/web-app/js/application.js#L3" target="_blank">Logging.router</a></span> function with an instance (sort of) of the message every time a broadcast is made to mapping URI. The "router" function on the Logging object tries to figure out if this is a message indicating that a new logger has joined the service, or if it's a message for a specific logging instance. If it's not a channel-specific logging message, it will delegate the message to a global callback function that will create a widget for the new loggers. If it's a message for a single application, it will figure out where that widget is and put the message into its container.
-	  </p>
-	</div>
-      </div>
-      <hr>
-      <div class="row-fluid marketing body">
-	<div class="span12">
-	  <h4>Conclusion</h4>
-	  <p>
-The key takeaway that I hope you have from this project write-up is how you can leverage a modern tech stack to build some really creative and awesome things. Using Spring Integration to serve as the "skeleton" for your application lets you have a lot of flexibility in building really powerful message driven applications.
-	  </p>
-	</div>
-      </div>
-      <hr>
-      <div class="row-fluid marketing footer">
-        <div class="span6">
-          <h4><a href="http://twitter.com/danveloper"><span class="social"><i class="icon-twitter"></i></span>@danveloper</a></h4>
-	  <hr>
-	  <h4><a href="http://github.com/danveloper"><span class="social"><i class="icon-github"></i></span>danveloper at github</a></h4>
-	  <hr>
-          <h4><a href="http://facebook.com/danveloper"><span class="social"><i class="icon-facebook"></i></span>Daniel Woods on facebook</a></h4>
-	  <hr>
-          <h4><a href="http://www.linkedin.com/in/danveloper"><span class="social"><i class="icon-linkedin"></i></span>Dan Woods on LinkedIn</a></h4>
-	  <hr>
-	  <h4><a href="mailto:daniel.p.woods@gmail.com"><span class="social"><i class="icon-envelope"></i></span>me at gmail</a></h4>
-        </div>
-
-        <div class="span6">
-          <h4>Web Developer.</h4>
-          <p>I develop the web.</p>
-
-          <h4>Architect.</h4>
-          <p>I have a passion for good software design.</p>
-
-          <h4>Problem Solver.</h4>
-          <p>I solve problems with software.</p>
-        </div>
-      </div>
-
-      <hr>
-
-      <div class="footer">
-        <p class="pull-left">&copy; Dan Woods 2012.</p>
-	<p class="pull-right">But, it's free for you to use in any way you see fit.</p>
-	<div style="clear:both"></div>
-      </div>
-
-    </div> <!-- /container -->
-
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="assets/js/jquery.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
-
   </body>
+
 </html>
+ 
